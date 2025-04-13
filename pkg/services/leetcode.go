@@ -80,8 +80,7 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
 	for next {
 		fmt.Println("retrieving data please wait...")
 		url := fmt.Sprintf("%s?offset=%d&limit=%d", config.Config.Urls.LeetcodeSubmissions, offset, limit)
-		fmt.Println(url)
-
+		var responseData SubmissionApiResponse
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			fmt.Println("Error: ", err)
@@ -110,15 +109,12 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
 			os.Exit(1)
 		}
 
-		var responseData SubmissionApiResponse
-
 		if err := json.Unmarshal(body, &responseData); err != nil {
 			fmt.Println("Error when deserializing response data", err)
 			os.Exit(1)
 		}
 
 		submissions = append(submissions, responseData.SubmissionsDump...)
-		fmt.Println(len(submissions))
 		next = responseData.HasNext
 		if next {
 			offset += limit
@@ -128,6 +124,8 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
 		if offset%100 == 0 {
 			second += 1
 		}
+		break
+
 	}
 	return submissions
 }

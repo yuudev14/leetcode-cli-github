@@ -37,8 +37,8 @@ func (g *GitImpl) GitAdd() {
 }
 
 func (g *GitImpl) GitCommit(commitMsg string) {
-	cmd := exec.Command("git", "commit", "-m", commitMsg)
-	g.StdHandler(cmd, "error running git commit")
+	cmd := exec.Command("git", "commit", "-m", fmt.Sprintf(`"%s"`, commitMsg))
+	g.StdHandler(cmd, "error running git commit "+commitMsg)
 
 }
 
