@@ -4,14 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/example/leetcode-github/pkg/schema"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
-
-type SecretsContent struct {
-	CsrfToken       string `yaml:"csrftoken"`
-	LeetcodeSession string `yaml:"LEETCODE_SESSION"`
-}
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
@@ -29,7 +25,7 @@ var loginCmd = &cobra.Command{
 			fmt.Println("Warning", err)
 		}
 
-		secrets := SecretsContent{
+		secrets := schema.SecretsContent{
 			CsrfToken:       csrftoken,
 			LeetcodeSession: LEETCODE_SESSION,
 		}

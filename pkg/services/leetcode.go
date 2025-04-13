@@ -49,6 +49,12 @@ type LeetcodeServiceImpl struct {
 }
 
 func NewLeetcodeService(csrftoken string, LEETCODE_SESSION string) LeetcodeService {
+	if csrftoken == "" {
+		csrftoken = utils.GetKeyInYmlFile(".secrets/secrets.yml", "csrftoken")
+	}
+	if LEETCODE_SESSION == "" {
+		LEETCODE_SESSION = utils.GetKeyInYmlFile(".secrets/secrets.yml", "LEETCODE_SESSION")
+	}
 	return &LeetcodeServiceImpl{
 		csrftoken:        csrftoken,
 		LEETCODE_SESSION: LEETCODE_SESSION,
