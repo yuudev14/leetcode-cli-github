@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/example/leetcode-github/pkg/services"
-	"github.com/fatih/color"
+	"github.com/example/leetcode-github/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -15,33 +14,47 @@ func init() {
 	submissionToGitCmd.Flags().StringVarP(&LEETCODE_SESSION, "leetcode-session", "s", "", "leetcode session to use in request")
 }
 
+var extensions = map[string]string{
+	"javascript": "js",
+	"golang":     "go",
+	"python":     "py",
+	"python3":    "py",
+	"typescript": "ts",
+}
+
 var submissionToGitCmd = &cobra.Command{
 	Use:   "submissions-to-git",
-	Short: "Get all submission in leetcode",
+	Short: "Get all submission in leetcode and push to git",
 	Run: func(cmd *cobra.Command, args []string) {
 		leetcodeService := services.NewLeetcodeService(csrftoken, LEETCODE_SESSION)
 		submissions := leetcodeService.GetAllSubmitted()
 
+		set := map[string]bool{}
+
 		for _, v := range submissions {
-			titleColor := color.New(color.FgCyan, color.Bold)
-			failedColor := color.New(color.FgRed)
-			successColor := color.New(color.FgGreen)
-			title := titleColor.Sprintf("%s", v.Title)
-			var status string
-			if v.StatusDisplay == "Accepted" {
-				status = successColor.Sprint(v.StatusDisplay)
-			} else {
-				status = failedColor.Sprint(v.StatusDisplay)
+			folderPath := fmt.Sprintf("solution/%s/%s", v.Title, v.Lang)
+
+			// if folder path already exist in map, ignore
+			if !set[folderPath] {
+				// create nested folders
+				utils.CreateAllFolders(folderPath)
+
+				// if language not in the extensions use txt
+				extension, ok := extensions[v.Lang]
+				if !ok {
+					extension = "txt"
+				}
+
+				// generate the file name and write in the file
+				fileName := fmt.Sprintf("solution/%s/%s/index.%s", v.Title, v.Lang, extension)
+				utils.WriteInFile(fileName, []byte(v.Code))
+
+				set[folderPath] = true
 			}
-
-			output := fmt.Sprintf(`
-Problem: %s
-Status: %s
-time: %s
-=====================================
-						`, title, status, time.Unix(int64(v.Timestamp), 0).Format(time.RFC1123Z))
-
-			fmt.Println(output)
 		}
+
+		git := utils.NewGit()
+
+		git.PushAllChanges()
 	},
 }

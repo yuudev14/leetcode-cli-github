@@ -49,11 +49,18 @@ type LeetcodeServiceImpl struct {
 }
 
 func NewLeetcodeService(csrftoken string, LEETCODE_SESSION string) LeetcodeService {
+
+	// if csrftoke or leetcode sessions is empty, grab from the secrets
 	if csrftoken == "" {
 		csrftoken = utils.GetKeyInYmlFile(".secrets/secrets.yml", "csrftoken")
 	}
 	if LEETCODE_SESSION == "" {
 		LEETCODE_SESSION = utils.GetKeyInYmlFile(".secrets/secrets.yml", "LEETCODE_SESSION")
+	}
+
+	if LEETCODE_SESSION == "" || csrftoken == "" {
+		fmt.Println("leetcode session and csrftoken should not be empty. please try to login or provide their values")
+		os.Exit(1)
 	}
 	return &LeetcodeServiceImpl{
 		csrftoken:        csrftoken,
@@ -65,13 +72,15 @@ func NewLeetcodeService(csrftoken string, LEETCODE_SESSION string) LeetcodeServi
 // GetAllSubmitted implements LeetcodeService.
 func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
 	offset := 0
-	limit := 1000
+	limit := 20
 	submissions := []SubmissionData{}
+	second := 1
 	next := true
 	client := &http.Client{}
 	for next {
 		fmt.Println("retrieving data please wait...")
 		url := fmt.Sprintf("%s?offset=%d&limit=%d", config.Config.Urls.LeetcodeSubmissions, offset, limit)
+		fmt.Println(url)
 
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
@@ -109,11 +118,16 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
 		}
 
 		submissions = append(submissions, responseData.SubmissionsDump...)
+		fmt.Println(len(submissions))
 		next = responseData.HasNext
 		if next {
 			offset += limit
 		}
-		time.Sleep(1 * time.Second)
+		// to avoid permission error for triggering multiple apis.
+		time.Sleep(time.Duration(second) * time.Second)
+		if offset%100 == 0 {
+			second += 1
+		}
 	}
 	return submissions
 }

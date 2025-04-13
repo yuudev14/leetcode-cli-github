@@ -19,7 +19,12 @@ func GetKeyInYmlFile(fileName string, key string) string {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	value, ok := data[key]
 
-	return data[key]
+	if ok {
+		return value
+	}
+
+	return ""
 
 }
