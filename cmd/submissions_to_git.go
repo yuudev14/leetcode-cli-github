@@ -27,15 +27,16 @@ var submissionToGitCmd = &cobra.Command{
 	Short: "Get all submission in leetcode and push to git",
 	Run: func(cmd *cobra.Command, args []string) {
 		leetcodeService := services.NewLeetcodeService(csrftoken, LEETCODE_SESSION)
-		submissions := leetcodeService.GetAllSubmitted()
 
+		// Note: Enhancement, store last scanned date in .secrets folder. anywhere to avoid waiting too long
+		submissions := leetcodeService.GetAllSubmitted()
 		set := map[string]bool{}
 
 		for _, v := range submissions {
 			folderPath := fmt.Sprintf("solution/%d %s/%s/", v.QuestionId, v.Title, v.Lang)
 
 			// if folder path already exist in map, ignore
-			if !set[folderPath] {
+			if !set[folderPath] && v.StatusDisplay == "Accepted" {
 				// create nested folders
 				utils.CreateAllFolders(folderPath)
 
