@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -8,52 +9,35 @@ import (
 
 	"github.com/example/leetcode-github/internal/config"
 	"github.com/example/leetcode-github/pkg/utils"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
-type SubmissionData struct {
-	Id            int `json:"id"`
-	QuestionId    string
-	Lang          string
-	LangName      string
-	Time          string
-	Timestamp     int
-	Status        int
-	StatusDisplay string
-	Runtime       string
-	Url           string
-	IsPending     string
-	Title         string
-	Memory        string
-	Code          string
-	CompareResult string
-	TitleSlug     string
-	HasNote       bool
-	FlagType      int
-	FrontendId    int
+type SubmissionApiResponse struct {
+	SubmissionsDump []SubmissionData `json:"submissions_dump"`
 }
 
-// {
-// 	"id": 1604440035,
-// 	"question_id": 3,
-// 	"lang": "python3",
-// 	"lang_name": "Python3",
-// 	"time": "16 hours, 10 minutes",
-// 	"timestamp": 1744455880,
-// 	"status": 10,
-// 	"status_display": "Accepted",
-// 	"runtime": "16 ms",
-// 	"url": "/submissions/detail/1604440035/",
-// 	"is_pending": "Not Pending",
-// 	"title": "Longest Substring Without Repeating Characters",
-// 	"memory": "17.8 MB",
-// 	"code": "class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        hash_map = set()\n        \n        max_length = 0\n        L = 0\n\n        for R in range(len(s)):\n            while s[R] in hash_map:\n                hash_map.remove(s[L])\n                L += 1\n            hash_map.add(s[R])\n            max_length = max(max_length, len(hash_map))\n        return max_length\n",
-// 	"compare_result": "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-// 	"title_slug": "longest-substring-without-repeating-characters",
-// 	"has_notes": false,
-// 	"flag_type": 1,
-// 	"frontend_id": 574
-// }
+type SubmissionData struct {
+	Id            int    `json:"id"`
+	QuestionId    int    `json:"question_id"`
+	Lang          string `json:"lang"`
+	LangName      string `json:"lang_name"`
+	Time          string `json:"time"`
+	Timestamp     int    `json:"timestamp"`
+	Status        int    `json:"status"`
+	StatusDisplay string `json:"status_display"`
+	Runtime       string `json:"runtime"`
+	Url           string `json:"url"`
+	IsPending     string `json:"is_pending"`
+	Title         string `json:"title"`
+	Memory        string `json:"memory"`
+	Code          string `json:"code"`
+	CompareResult string `json:"compare_result"`
+	TitleSlug     string `json:"title_slug"`
+	HasNote       bool   `json:"has_notes"`
+	FlagType      int    `json:"flag_type"`
+	FrontendId    int    `json:"frontend_id"`
+}
 
 var csrftoken string
 var LEETCODE_SESSION string
@@ -63,7 +47,7 @@ var limit int16
 func init() {
 	rootCmd.AddCommand(submissionCmd)
 	submissionCmd.Flags().StringVarP(&csrftoken, "csrftoken", "c", "", "csrftoken to use in request")
-	submissionCmd.Flags().StringVarP(&LEETCODE_SESSION, "leetcode-session", "ls", "", "leetcode session to use in request")
+	submissionCmd.Flags().StringVarP(&LEETCODE_SESSION, "leetcode-session", "s", "", "leetcode session to use in request")
 	submissionCmd.Flags().Int16VarP(&offset, "offset", "o", 0, "offset of the submitted")
 	submissionCmd.Flags().Int16VarP(&limit, "limit", "l", 20, "limit of the submitted")
 }
@@ -94,11 +78,25 @@ var submissionCmd = &cobra.Command{
 
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Println("Error reading response")
+			fmt.Println("Error reading response", err)
 			os.Exit(1)
 		}
 
-		fmt.Println(resp.StatusCode, string(body))
+		var responseData SubmissionApiResponse
 
+		if err := json.Unmarshal(body, &responseData); err != nil {
+			fmt.Println("Error when deserializing response data", err)
+			os.Exit(1)
+		}
+
+		// fmt.Println(resp.StatusCode, responseData)
+
+		for _, v := range responseData.SubmissionsDump {
+			d := color.New(color.FgCyan, color.Bold)
+			x := d.Sprintf("This prints bold cyan %v\n", v)
+			c := color.New(color.FgCyan).Add(color.Underline)
+			println(x, c.Sprintf("This prints bold cyan %v\n", v))
+
+		}
 	},
 }
