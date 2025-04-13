@@ -1,9 +1,7 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"time"
@@ -76,7 +74,7 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
 	submissions := []SubmissionData{}
 	second := 1
 	next := true
-	client := &http.Client{}
+
 	for next {
 		fmt.Println("retrieving data please wait...")
 		url := fmt.Sprintf("%s?offset=%d&limit=%d", config.Config.Urls.LeetcodeSubmissions, offset, limit)
@@ -89,30 +87,7 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
 
 		utils.SetLeetcodeCookies(req, l.csrftoken, l.LEETCODE_SESSION)
 
-		resp, err := client.Do(req)
-
-		if err != nil {
-			fmt.Println("Error: ", err)
-			os.Exit(1)
-		}
-
-		defer resp.Body.Close()
-
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println("Error reading response", err)
-			os.Exit(1)
-		}
-
-		if resp.StatusCode != 200 {
-			fmt.Println(string(body), resp.Status)
-			os.Exit(1)
-		}
-
-		if err := json.Unmarshal(body, &responseData); err != nil {
-			fmt.Println("Error when deserializing response data", err)
-			os.Exit(1)
-		}
+		utils.Post(req, &responseData)
 
 		submissions = append(submissions, responseData.SubmissionsDump...)
 		next = responseData.HasNext
