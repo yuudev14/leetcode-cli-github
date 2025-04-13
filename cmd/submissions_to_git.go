@@ -32,7 +32,7 @@ var submissionToGitCmd = &cobra.Command{
 		set := map[string]bool{}
 
 		for _, v := range submissions {
-			folderPath := fmt.Sprintf("solution/%s/%s", v.Title, v.Lang)
+			folderPath := fmt.Sprintf("solution/%d %s/%s/", v.QuestionId, v.Title, v.Lang)
 
 			// if folder path already exist in map, ignore
 			if !set[folderPath] {

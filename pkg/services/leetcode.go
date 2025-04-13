@@ -124,7 +124,6 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
 		if offset%100 == 0 {
 			second += 1
 		}
-		break
 
 	}
 	return submissions
