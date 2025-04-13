@@ -10,13 +10,13 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(submissionCmd)
-	submissionCmd.Flags().StringVarP(&csrftoken, "csrftoken", "c", "", "csrftoken to use in request")
-	submissionCmd.Flags().StringVarP(&LEETCODE_SESSION, "leetcode-session", "s", "", "leetcode session to use in request")
+	rootCmd.AddCommand(submissionToGitCmd)
+	submissionToGitCmd.Flags().StringVarP(&csrftoken, "csrftoken", "c", "", "csrftoken to use in request")
+	submissionToGitCmd.Flags().StringVarP(&LEETCODE_SESSION, "leetcode-session", "s", "", "leetcode session to use in request")
 }
 
-var submissionCmd = &cobra.Command{
-	Use:   "submissions",
+var submissionToGitCmd = &cobra.Command{
+	Use:   "submissions-to-git",
 	Short: "Get all submission in leetcode",
 	Run: func(cmd *cobra.Command, args []string) {
 		leetcodeService := services.NewLeetcodeService(csrftoken, LEETCODE_SESSION)

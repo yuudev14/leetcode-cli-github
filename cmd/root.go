@@ -7,6 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var csrftoken string
+var LEETCODE_SESSION string
+
 var rootCmd = &cobra.Command{
 	Use:   "leetcode-github",
 	Short: "Sample project using go to import all answered questions in git",
