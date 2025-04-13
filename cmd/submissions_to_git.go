@@ -46,7 +46,7 @@ var submissionToGitCmd = &cobra.Command{
 				}
 
 				// generate the file name and write in the file
-				fileName := fmt.Sprintf("solution/%s/%s/index.%s", v.Title, v.Lang, extension)
+				fileName := fmt.Sprintf("solution/%d %s/%s/index.%s", v.QuestionId, v.Title, v.Lang, extension)
 				utils.WriteInFile(fileName, []byte(v.Code))
 
 				set[folderPath] = true
