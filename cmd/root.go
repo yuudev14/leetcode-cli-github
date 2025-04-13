@@ -8,7 +8,8 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use: "leetcode-github",
+	Use:   "leetcode-github",
+	Short: "Sample project using go to import all answered questions in git",
 	Run: func(cmd *cobra.Command, args []string) {
 
 	},
