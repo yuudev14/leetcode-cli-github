@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 )
@@ -12,6 +13,7 @@ func CreateFolders(folderName string) {
 }
 
 func WriteInFile(fileName string, content []byte) {
+	content = bytes.ReplaceAll(content, []byte("\n"), []byte("\r\n"))
 	err := os.WriteFile(fileName, content, os.ModePerm)
 	if err != nil {
 		fmt.Println("Warning", err)

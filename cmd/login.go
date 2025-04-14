@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/example/leetcode-github/pkg/schema"
+	"github.com/example/leetcode-github/pkg/utils"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -21,9 +22,7 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "login",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := os.Mkdir(".secrets", os.ModePerm); err != nil {
-			fmt.Println("Warning", err)
-		}
+		utils.CreateFolders(".secrets")
 
 		secrets := schema.SecretsContent{
 			CsrfToken:       csrftoken,
@@ -38,10 +37,7 @@ var loginCmd = &cobra.Command{
 
 		fileName := ".secrets/secrets.yml"
 
-		if err := os.WriteFile(fileName, secretsYaml, os.ModePerm); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		utils.WriteInFile(fileName, secretsYaml)
 
 		fmt.Println("Credentials saved in store")
 
