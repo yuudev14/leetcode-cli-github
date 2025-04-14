@@ -13,10 +13,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var pushToGit bool
+
 func init() {
 	rootCmd.AddCommand(submissionToGitCmd)
 	submissionToGitCmd.Flags().StringVarP(&csrftoken, "csrftoken", "c", "", "csrftoken to use in request")
 	submissionToGitCmd.Flags().StringVarP(&LEETCODE_SESSION, "leetcode-session", "s", "", "leetcode session to use in request")
+	submissionToGitCmd.Flags().BoolVarP(&pushToGit, "push-to-git", "p", false, "leetcode session to use in request")
 }
 
 var extensions = map[string]string{
@@ -96,12 +99,13 @@ var submissionToGitCmd = &cobra.Command{
 	Short: "Get all submission in leetcode and push to git",
 	Run: func(cmd *cobra.Command, args []string) {
 		lastExecutionDate := getLastExecutionDate()
-		fmt.Println(lastExecutionDate)
+		fmt.Println("last execution date", lastExecutionDate)
 		leetcodeService := services.NewLeetcodeService(csrftoken, LEETCODE_SESSION)
 		submissions := leetcodeService.GetAllSubmitted(lastExecutionDate)
 		generateSolutions(submissions)
 		storeLastExecutionDate()
-		publishInGit()
-
+		if pushToGit {
+			publishInGit()
+		}
 	},
 }

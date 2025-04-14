@@ -74,9 +74,9 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted(lastDate *time.Time) []SubmissionD
 	submissions := []SubmissionData{}
 	second := 1
 	next := true
+	fetchCount := 0
 
 	for next {
-		time.Sleep(time.Duration(second) * time.Second)
 		fmt.Println("retrieving data please wait... offset", offset)
 		url := fmt.Sprintf("%s?offset=%d&limit=%d", config.Config.Urls.LeetcodeSubmissions, offset, limit)
 		var responseData SubmissionApiResponse
@@ -90,7 +90,14 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted(lastDate *time.Time) []SubmissionD
 		resErr := utils.Post(req, &responseData)
 
 		if resErr != nil {
-			second += 1
+			// to avoid permission error for triggering multiple apis.
+			// if fetch count -- 3 add 1 in seconds
+			fmt.Println("Warning: ", resErr)
+			fetchCount += 1
+			if fetchCount == 3 {
+				second += 1
+			}
+			time.Sleep(time.Duration(second) * time.Second)
 			continue
 		}
 
@@ -98,9 +105,10 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted(lastDate *time.Time) []SubmissionD
 		if lastDate != nil {
 			var shouldBreak bool
 			for _, v := range responseData.SubmissionsDump {
-				fmt.Println(time.Unix(int64(v.Timestamp), 0), *lastDate)
-				if time.Unix(int64(v.Timestamp), 0).After(*lastDate) {
+
+				if time.Unix(int64(v.Timestamp), 0).Before(*lastDate) {
 					shouldBreak = true
+					fmt.Println(time.Unix(int64(v.Timestamp), 0), *lastDate)
 					break
 				} else {
 					submissions = append(submissions, v)
@@ -118,11 +126,9 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted(lastDate *time.Time) []SubmissionD
 		if next {
 			offset += limit
 		}
-		// to avoid permission error for triggering multiple apis.
 
-		// if offset%100 == 0 {
-		// 	second += 1
-		// }
+		second = 1
+		fetchCount = 0
 
 	}
 	return submissions
