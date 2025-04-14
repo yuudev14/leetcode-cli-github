@@ -40,7 +40,7 @@ func Post[T any](req *http.Request, responseData *T) error {
 
 	if resp.StatusCode != 200 {
 		fmt.Println(string(body), resp.Status)
-		return err
+		return fmt.Errorf("status code is %d. msg: %s", resp.StatusCode, string(body))
 	}
 
 	if err := json.Unmarshal(body, responseData); err != nil {
