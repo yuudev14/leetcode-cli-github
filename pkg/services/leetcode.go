@@ -76,6 +76,7 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted(lastDate *time.Time) []SubmissionD
 	next := true
 
 	for next {
+		time.Sleep(time.Duration(second) * time.Second)
 		fmt.Println("retrieving data please wait... offset", offset)
 		url := fmt.Sprintf("%s?offset=%d&limit=%d", config.Config.Urls.LeetcodeSubmissions, offset, limit)
 		var responseData SubmissionApiResponse
@@ -97,6 +98,7 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted(lastDate *time.Time) []SubmissionD
 		if lastDate != nil {
 			var shouldBreak bool
 			for _, v := range responseData.SubmissionsDump {
+				fmt.Println(time.Unix(int64(v.Timestamp), 0), *lastDate)
 				if time.Unix(int64(v.Timestamp), 0).After(*lastDate) {
 					shouldBreak = true
 					break
@@ -117,7 +119,7 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted(lastDate *time.Time) []SubmissionD
 			offset += limit
 		}
 		// to avoid permission error for triggering multiple apis.
-		time.Sleep(time.Duration(second) * time.Second)
+
 		// if offset%100 == 0 {
 		// 	second += 1
 		// }
