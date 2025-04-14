@@ -59,11 +59,11 @@ func publishInGit() {
 
 }
 
-func storeLastExecutionDate(date time.Time) {
+func storeLastExecutionDate() {
 	utils.CreateFolders(".store")
 
 	secrets := schema.ConfigContent{
-		LastSubmissionDate: date.Unix(),
+		LastSubmissionDate: time.Now().Unix(),
 	}
 
 	secretsYaml, err := yaml.Marshal(&secrets)
@@ -95,11 +95,12 @@ var submissionToGitCmd = &cobra.Command{
 	Use:   "submissions-to-git",
 	Short: "Get all submission in leetcode and push to git",
 	Run: func(cmd *cobra.Command, args []string) {
-		leetcodeService := services.NewLeetcodeService(csrftoken, LEETCODE_SESSION)
 		lastExecutionDate := getLastExecutionDate()
+		fmt.Println(lastExecutionDate)
+		leetcodeService := services.NewLeetcodeService(csrftoken, LEETCODE_SESSION)
 		submissions := leetcodeService.GetAllSubmitted(lastExecutionDate)
 		generateSolutions(submissions)
-		storeLastExecutionDate(time.Unix(submissions[0].Timestamp, 0))
+		storeLastExecutionDate()
 		publishInGit()
 
 	},
