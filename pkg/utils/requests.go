@@ -20,7 +20,7 @@ func SetLeetcodeCookies(req *http.Request, csrftoken string, LEETCODE_SESSION st
 	})
 }
 
-func Post[T any](req *http.Request, responseData *T) {
+func Post[T any](req *http.Request, responseData *T) error {
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
@@ -40,12 +40,14 @@ func Post[T any](req *http.Request, responseData *T) {
 
 	if resp.StatusCode != 200 {
 		fmt.Println(string(body), resp.Status)
-		os.Exit(1)
+		return err
 	}
 
 	if err := json.Unmarshal(body, responseData); err != nil {
 		fmt.Println("Error when deserializing response data", err)
 		os.Exit(1)
 	}
+
+	return nil
 
 }

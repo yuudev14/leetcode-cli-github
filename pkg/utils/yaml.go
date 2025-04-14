@@ -9,15 +9,13 @@ import (
 
 func GetKeyInYmlFile(fileName string, key string) string {
 	var data map[string]string
-	f, err := os.ReadFile(".secrets/secrets.yml")
+	f, err := os.ReadFile(fileName)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		fmt.Println("Warning", err)
 	}
 	err = yaml.Unmarshal(f, &data)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		fmt.Println("Warning", err)
 	}
 	value, ok := data[key]
 

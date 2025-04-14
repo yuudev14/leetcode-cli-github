@@ -21,7 +21,7 @@ type SubmissionData struct {
 	Lang          string `json:"lang"`
 	LangName      string `json:"lang_name"`
 	Time          string `json:"time"`
-	Timestamp     int    `json:"timestamp"`
+	Timestamp     int64  `json:"timestamp"`
 	Status        int    `json:"status"`
 	StatusDisplay string `json:"status_display"`
 	Runtime       string `json:"runtime"`
@@ -38,7 +38,7 @@ type SubmissionData struct {
 }
 
 type LeetcodeService interface {
-	GetAllSubmitted() []SubmissionData
+	GetAllSubmitted(LastDate *time.Time) []SubmissionData
 }
 
 type LeetcodeServiceImpl struct {
@@ -68,7 +68,7 @@ func NewLeetcodeService(csrftoken string, LEETCODE_SESSION string) LeetcodeServi
 }
 
 // GetAllSubmitted implements LeetcodeService.
-func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
+func (l *LeetcodeServiceImpl) GetAllSubmitted(lastDate *time.Time) []SubmissionData {
 	offset := 0
 	limit := 20
 	submissions := []SubmissionData{}
@@ -86,10 +86,27 @@ func (l *LeetcodeServiceImpl) GetAllSubmitted() []SubmissionData {
 		}
 
 		utils.SetLeetcodeCookies(req, l.csrftoken, l.LEETCODE_SESSION)
-
 		utils.Post(req, &responseData)
 
-		submissions = append(submissions, responseData.SubmissionsDump...)
+		// if last date is provided, filter data and break
+		if lastDate != nil {
+			var shouldBreak bool
+			for _, v := range responseData.SubmissionsDump {
+				if time.Unix(int64(v.Timestamp), 0).After(*lastDate) {
+					shouldBreak = true
+					break
+				} else {
+					submissions = append(submissions, v)
+				}
+			}
+			if shouldBreak {
+				break
+			}
+
+		} else {
+			submissions = append(submissions, responseData.SubmissionsDump...)
+		}
+
 		next = responseData.HasNext
 		if next {
 			offset += limit

@@ -20,7 +20,7 @@ var submissionCmd = &cobra.Command{
 	Short: "Get all submission in leetcode",
 	Run: func(cmd *cobra.Command, args []string) {
 		leetcodeService := services.NewLeetcodeService(csrftoken, LEETCODE_SESSION)
-		submissions := leetcodeService.GetAllSubmitted()
+		submissions := leetcodeService.GetAllSubmitted(nil)
 
 		for _, v := range submissions {
 			titleColor := color.New(color.FgCyan, color.Bold)
